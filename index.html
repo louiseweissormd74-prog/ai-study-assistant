@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AI 学习助手——作业辅导、资料总结、课堂转录与论文写作的一站式学习空间。" />
+    <title>AI 学习助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: '#0F172A', muted: '#64748B', line: '#E2E8F0', canvas: '#F6F9FD',
+              brand: { 50:'#EFF6FF', 100:'#DBEAFE', 500:'#4382F6', 600:'#2563EB', 700:'#1D4ED8' }
+            },
+            boxShadow: {
+              card: '0 12px 32px rgba(15,23,42,.06)',
+              float: '0 20px 60px rgba(37,99,235,.18)'
+            },
+            borderRadius: { '4xl': '2rem' },
+            fontFamily: { sans: ['Inter','PingFang SC','Microsoft YaHei','system-ui','sans-serif'] }
+          }
+        }
+      }
+    </script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { background: #f6f9fd; }
+      ::selection { background: #bfdbfe; color: #1e3a8a; }
+      .glass { background: rgba(255,255,255,.84); backdrop-filter: blur(18px); }
+      .soft-grid { background-image: radial-gradient(circle at 1px 1px, rgba(67,130,246,.14) 1px, transparent 0); background-size: 22px 22px; }
+      .brand-gradient { background: linear-gradient(135deg,#2563eb 0%,#4382f6 55%,#78a7ff 100%); }
+      .text-gradient { background: linear-gradient(100deg,#0f172a 20%,#2563eb 92%); -webkit-background-clip:text; color:transparent; }
+      .hide-scrollbar::-webkit-scrollbar { display:none; }
+      .hide-scrollbar { scrollbar-width:none; }
+      .tool-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+      .tool-card:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(15,23,42,.09); }
+      .nav-item { transition: background-color .2s ease, color .2s ease; }
+      .nav-item.active { color:#2563eb; background:#eff6ff; }
+      .progress-ring { transform: rotate(-90deg); }
+      .modal-in { animation: modalIn .22s ease-out both; }
+      .fade-in { animation: fadeIn .32s ease-out both; }
+      .typing-dot { animation: bounce 1s infinite; }
+      .typing-dot:nth-child(2) { animation-delay: .12s; }
+      .typing-dot:nth-child(3) { animation-delay: .24s; }
+      @keyframes modalIn { from { opacity:0; transform:translateY(10px) scale(.98) } to { opacity:1; transform:none } }
+      @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+      @keyframes bounce { 0%,60%,100% { transform:translateY(0) } 30% { transform:translateY(-5px) } }
+      @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
+    </style>
+  </head>
+  <body class="font-sans text-ink antialiased min-h-screen overflow-x-hidden">
+    <div class="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      <div class="absolute -top-40 left-[18%] size-[480px] rounded-full bg-blue-200/25 blur-3xl"></div>
+      <div class="absolute -bottom-52 right-[4%] size-[420px] rounded-full bg-indigo-200/20 blur-3xl"></div>
+    </div>
+
+    <aside id="sidebar" class="fixed z-40 inset-y-0 left-0 w-[244px] border-r border-white/80 bg-white/90 backdrop-blur-xl flex flex-col px-4 py-5 -translate-x-full lg:translate-x-0 transition-transform duration-300">
+      <div class="flex items-center gap-3 px-2 mb-8">
+        <div class="brand-gradient size-11 rounded-2xl shadow-lg shadow-blue-200 grid place-items-center shrink-0">
+          <svg viewBox="0 0 32 32" class="size-7" fill="none" aria-hidden="true"><path d="M7 24 13.4 8.7c1-2.3 4.2-2.3 5.2 0L25 24" stroke="white" stroke-width="5" stroke-linecap="round"/><path d="m10 17 6-4.7 6 4.7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div><p class="font-bold text-[17px] leading-tight">AI 学习助手</p><p class="text-xs text-slate-400 mt-1">Learn smarter</p></div>
+      </div>
+
+      <nav class="space-y-1" aria-label="主导航">
+        <button class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium" data-page="home"><i data-lucide="house" class="size-5"></i><span>首页</span></button>
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-page="chat-home"><i data-lucide="message-circle" class="size-5"></i><span>AI 问答</span></button>
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-tool="PDF 智能总结"><i data-lucide="file-text" class="size-5"></i><span>PDF 总结</span></button>
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-tool="课堂转录"><i data-lucide="mic-2" class="size-5"></i><span>课堂转录</span></button>
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-tool="数学分步解题"><i data-lucide="sigma" class="size-5"></i><span>数学解题</span></button>
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-tool="论文写作助手"><i data-lucide="pen-line" class="size-5"></i><span>论文助手</span></button>
+      </nav>
+
+      <div class="mt-8 mb-2 px-3 text-[11px] font-semibold tracking-widest text-slate-400 uppercase">学习空间</div>
+      <nav class="space-y-1">
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-page="prompts"><i data-lucide="sparkles" class="size-5"></i><span>Prompt 模板</span><span class="ml-auto rounded-full bg-blue-100 text-blue-600 px-2 py-0.5 text-[10px]">24</span></button>
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-page="history"><i data-lucide="clock-3" class="size-5"></i><span>历史记录</span></button>
+        <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium text-slate-500" data-page="favorites"><i data-lucide="star" class="size-5"></i><span>我的收藏</span></button>
+      </nav>
+
+      <div class="mt-auto rounded-2xl bg-slate-900 text-white p-4 overflow-hidden relative">
+        <div class="absolute -right-8 -top-8 size-24 bg-blue-500/30 rounded-full blur-xl"></div>
+        <div class="relative"><div class="flex items-center justify-between"><span class="text-xs text-slate-300">本周学习目标</span><span class="text-xs font-semibold">68%</span></div><div class="h-1.5 bg-white/15 rounded-full mt-3"><div class="h-full w-[68%] bg-blue-400 rounded-full"></div></div><p class="text-xs text-slate-300 mt-3">再学习 2.4 小时即可完成</p></div>
+      </div>
+      <button class="mt-3 flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-500 hover:bg-slate-50"><div class="size-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 grid place-items-center text-blue-700 font-bold">林</div><div class="text-left"><p class="text-slate-700 font-medium">林同学</p><p class="text-xs text-slate-400">大学生 · Lv.4</p></div><i data-lucide="more-horizontal" class="ml-auto size-4"></i></button>
+    </aside>
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-900/30 z-30 hidden lg:hidden"></div>
+
+    <main class="relative lg:ml-[244px] min-h-screen">
+      <header class="h-[72px] sticky top-0 z-20 glass border-b border-white/80 px-4 sm:px-7 flex items-center gap-4">
+        <button id="menuBtn" class="lg:hidden size-10 rounded-xl border border-slate-200 bg-white grid place-items-center" aria-label="打开菜单"><i data-lucide="menu" class="size-5"></i></button>
+        <div class="hidden md:block relative w-full max-w-sm">
+          <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400"></i>
+          <input id="globalSearch" class="w-full h-10 rounded-xl bg-slate-100/75 border border-transparent focus:border-blue-300 focus:bg-white outline-none pl-10 pr-4 text-sm placeholder:text-slate-400" placeholder="搜索学习记录、文件或模板" />
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <button id="streakBtn" class="hidden sm:flex items-center gap-2 h-10 px-3 rounded-xl bg-orange-50 text-orange-600 text-sm font-medium hover:bg-orange-100"><i data-lucide="flame" class="size-4 fill-orange-400"></i>连续 7 天</button>
+          <button id="notifyBtn" class="relative size-10 rounded-xl bg-white border border-slate-200 grid place-items-center text-slate-600 hover:border-blue-300" aria-label="通知"><i data-lucide="bell" class="size-5"></i><span class="absolute right-2 top-2 size-2 rounded-full bg-red-500 border-2 border-white"></span></button>
+          <button class="size-10 rounded-xl brand-gradient grid place-items-center text-white shadow-md" aria-label="个人中心">林</button>
+        </div>
+      </header>
+
+      <div class="max-w-[1480px] mx-auto px-4 sm:px-7 py-6 lg:py-8">
+        <section class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div><p class="text-sm text-blue-600 font-semibold mb-1.5" id="dateGreeting">下午好，林同学</p><h1 class="text-2xl sm:text-[30px] leading-tight font-bold text-gradient">今天想学点什么？</h1><p class="text-slate-500 text-sm mt-2">把问题交给 AI，让复杂知识变得简单。</p></div>
+          <div class="flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex items-center gap-1.5"><span class="size-2 bg-emerald-500 rounded-full"></span>AI 服务正常</span><span class="text-slate-300">·</span><span>平均响应 1.8s</span></div>
+        </section>
+
+        <section class="grid xl:grid-cols-[minmax(0,1fr)_310px] gap-6 items-start">
+          <div class="min-w-0 space-y-6">
+            <div class="relative bg-white rounded-3xl shadow-card border border-white p-4 sm:p-5 overflow-hidden">
+              <div class="absolute right-0 top-0 w-52 h-24 bg-blue-100/45 blur-3xl"></div>
+              <div class="relative flex items-center gap-2 mb-3">
+                <span id="modeIcon" class="size-8 rounded-xl bg-blue-50 text-blue-600 grid place-items-center"><i data-lucide="sparkles" class="size-4"></i></span>
+                <div><p id="composerMode" class="font-semibold text-sm">智能问答</p><p id="composerHint" class="text-xs text-slate-400">支持文本、图片与文件</p></div>
+                <button id="modeDropdown" class="ml-auto size-8 rounded-lg hover:bg-slate-100 grid place-items-center text-slate-400" aria-label="切换模式"><i data-lucide="chevron-down" class="size-4"></i></button>
+              </div>
+              <textarea id="questionInput" rows="3" class="relative w-full resize-none outline-none text-[16px] leading-6 placeholder:text-slate-400 bg-transparent min-h-[76px]" placeholder="输入你的问题，例如：请分步骤讲解这道概率题……"></textarea>
+              <div id="attachmentList" class="hidden mb-3 flex flex-wrap gap-2"></div>
+              <div class="flex items-center gap-2 border-t border-slate-100 pt-3">
+                <input id="fileInput" type="file" class="hidden" multiple />
+                <button id="uploadBtn" class="size-9 rounded-xl bg-slate-50 text-slate-500 grid place-items-center hover:bg-blue-50 hover:text-blue-600" aria-label="上传文件"><i data-lucide="paperclip" class="size-4"></i></button>
+                <button id="imageBtn" class="size-9 rounded-xl bg-slate-50 text-slate-500 grid place-items-center hover:bg-blue-50 hover:text-blue-600" aria-label="上传图片"><i data-lucide="image" class="size-4"></i></button>
+                <button id="voiceBtn" class="size-9 rounded-xl bg-slate-50 text-slate-500 grid place-items-center hover:bg-blue-50 hover:text-blue-600" aria-label="语音输入"><i data-lucide="mic" class="size-4"></i></button>
+                <span class="hidden sm:block text-xs text-slate-400 ml-1">按 Enter 发送，Shift + Enter 换行</span>
+                <button id="sendBtn" class="ml-auto h-10 px-4 rounded-xl brand-gradient text-white font-medium text-sm flex items-center gap-2 shadow-md shadow-blue-200 hover:brightness-105 active:scale-[.98]"><span>开始解答</span><i data-lucide="arrow-up" class="size-4"></i></button>
+              </div>
+            </div>
+
+            <div id="answerPanel" class="hidden bg-white rounded-3xl shadow-card border border-white p-5 sm:p-6 fade-in">
+              <div class="flex items-start gap-3"><div class="size-9 rounded-xl brand-gradient grid place-items-center text-white shrink-0"><i data-lucide="sparkles" class="size-4"></i></div><div class="min-w-0 flex-1"><div class="flex items-center justify-between"><p class="font-semibold">AI 学习助手</p><span id="answerStatus" class="text-xs text-slate-400">正在思考</span></div><div id="typingLoader" class="flex gap-1.5 mt-5"><span class="typing-dot size-2 bg-blue-400 rounded-full"></span><span class="typing-dot size-2 bg-blue-400 rounded-full"></span><span class="typing-dot size-2 bg-blue-400 rounded-full"></span></div><div id="answerContent" class="hidden text-sm sm:text-base text-slate-600 leading-7 mt-3"></div><div id="answerActions" class="hidden mt-4 pt-3 border-t border-slate-100 flex gap-2"><button class="answer-action px-3 py-1.5 rounded-lg bg-slate-50 text-xs text-slate-500 flex items-center gap-1.5"><i data-lucide="copy" class="size-3.5"></i>复制</button><button class="answer-action px-3 py-1.5 rounded-lg bg-slate-50 text-xs text-slate-500 flex items-center gap-1.5"><i data-lucide="thumbs-up" class="size-3.5"></i>有帮助</button><button class="answer-action px-3 py-1.5 rounded-lg bg-slate-50 text-xs text-slate-500 flex items-center gap-1.5"><i data-lucide="refresh-cw" class="size-3.5"></i>重新生成</button></div></div></div>
+            </div>
+
+            <section>
+              <div class="flex items-center justify-between mb-4"><div><h2 class="text-lg font-bold">学习工具</h2><p class="text-xs text-slate-400 mt-1">选择最适合当前任务的 AI 助手</p></div><button id="allToolsBtn" class="text-sm text-blue-600 font-medium flex items-center gap-1 hover:gap-2 transition-all">全部工具<i data-lucide="arrow-right" class="size-4"></i></button></div>
+              <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3.5" id="toolCards">
+                <button class="tool-card text-left p-4 rounded-2xl bg-white border border-white shadow-card group" data-tool="AI 作业助手" data-placeholder="输入题目，或上传题目图片……"><div class="flex items-start justify-between"><span class="size-11 rounded-2xl bg-blue-50 text-blue-600 grid place-items-center"><i data-lucide="brain-circuit" class="size-5"></i></span><span class="text-[11px] px-2 py-1 rounded-full bg-blue-50 text-blue-600">常用</span></div><h3 class="font-semibold mt-3">AI 作业助手</h3><p class="text-xs text-slate-400 mt-1 leading-5">识别题目，拆解思路并讲清知识点</p></button>
+                <button class="tool-card text-left p-4 rounded-2xl bg-white border border-white shadow-card group" data-tool="PDF 智能总结" data-placeholder="上传 PDF，自动提取摘要、章节重点与关键结论……"><div class="flex items-start justify-between"><span class="size-11 rounded-2xl bg-red-50 text-red-500 grid place-items-center"><i data-lucide="file-text" class="size-5"></i></span><i data-lucide="arrow-up-right" class="size-4 text-slate-300 group-hover:text-blue-500"></i></div><h3 class="font-semibold mt-3">PDF 智能总结</h3><p class="text-xs text-slate-400 mt-1 leading-5">快速阅读资料，自动提炼重点与摘要</p></button>
+                <button class="tool-card text-left p-4 rounded-2xl bg-white border border-white shadow-card group" data-tool="课堂转录" data-placeholder="上传课堂录音，生成文字稿、课堂笔记和复习提纲……"><div class="flex items-start justify-between"><span class="size-11 rounded-2xl bg-violet-50 text-violet-600 grid place-items-center"><i data-lucide="audio-lines" class="size-5"></i></span><i data-lucide="arrow-up-right" class="size-4 text-slate-300 group-hover:text-blue-500"></i></div><h3 class="font-semibold mt-3">课堂转录</h3><p class="text-xs text-slate-400 mt-1 leading-5">录音转文字，自动整理课堂笔记</p></button>
+                <button class="tool-card text-left p-4 rounded-2xl bg-white border border-white shadow-card group" data-tool="数学分步解题" data-placeholder="输入数学或统计题目，获取逐步推导与结果验证……"><div class="flex items-start justify-between"><span class="size-11 rounded-2xl bg-amber-50 text-amber-500 grid place-items-center"><i data-lucide="radical" class="size-5"></i></span><i data-lucide="arrow-up-right" class="size-4 text-slate-300 group-hover:text-blue-500"></i></div><h3 class="font-semibold mt-3">数学分步解题</h3><p class="text-xs text-slate-400 mt-1 leading-5">公式识别、分步推导与答案验证</p></button>
+                <button class="tool-card text-left p-4 rounded-2xl bg-white border border-white shadow-card group" data-tool="论文写作助手" data-placeholder="告诉我论文主题、研究方向或需要优化的段落……"><div class="flex items-start justify-between"><span class="size-11 rounded-2xl bg-emerald-50 text-emerald-600 grid place-items-center"><i data-lucide="notebook-pen" class="size-5"></i></span><i data-lucide="arrow-up-right" class="size-4 text-slate-300 group-hover:text-blue-500"></i></div><h3 class="font-semibold mt-3">论文写作助手</h3><p class="text-xs text-slate-400 mt-1 leading-5">从选题、大纲到表达优化全程辅助</p></button>
+                <button class="tool-card text-left p-4 rounded-2xl bg-slate-900 border border-slate-900 shadow-card text-white group soft-grid" data-tool="Prompt 模板中心" data-placeholder="搜索或描述你需要的学习 Prompt 模板……"><div class="flex items-start justify-between"><span class="size-11 rounded-2xl bg-white/10 text-blue-300 grid place-items-center"><i data-lucide="wand-sparkles" class="size-5"></i></span><span class="text-[11px] px-2 py-1 rounded-full bg-white/10 text-blue-200">24 个模板</span></div><h3 class="font-semibold mt-3">Prompt 模板中心</h3><p class="text-xs text-slate-300 mt-1 leading-5">精选高质量指令，让 AI 回答更专业</p></button>
+              </div>
+            </section>
+
+            <section class="grid lg:grid-cols-2 gap-5 pb-8">
+              <div class="bg-white rounded-3xl shadow-card border border-white p-5">
+                <div class="flex items-center justify-between mb-3"><h2 class="font-bold">最近学习</h2><button class="text-xs text-blue-600" data-page="history">查看全部</button></div>
+                <div class="space-y-1">
+                  <button class="history-item w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 text-left"><span class="size-10 rounded-xl bg-amber-50 text-amber-500 grid place-items-center shrink-0"><i data-lucide="sigma" class="size-4"></i></span><span class="min-w-0"><span class="block text-sm font-medium truncate">概率论：条件概率与贝叶斯公式</span><span class="block text-xs text-slate-400 mt-1">数学解题 · 18 分钟前</span></span><i data-lucide="chevron-right" class="ml-auto size-4 text-slate-300"></i></button>
+                  <button class="history-item w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 text-left"><span class="size-10 rounded-xl bg-red-50 text-red-500 grid place-items-center shrink-0"><i data-lucide="file-text" class="size-4"></i></span><span class="min-w-0"><span class="block text-sm font-medium truncate">机器学习课程 Lecture 06.pdf</span><span class="block text-xs text-slate-400 mt-1">PDF 总结 · 昨天</span></span><i data-lucide="chevron-right" class="ml-auto size-4 text-slate-300"></i></button>
+                  <button class="history-item w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 text-left"><span class="size-10 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center shrink-0"><i data-lucide="notebook-pen" class="size-4"></i></span><span class="min-w-0"><span class="block text-sm font-medium truncate">生成式 AI 对教育的影响：论文大纲</span><span class="block text-xs text-slate-400 mt-1">论文助手 · 9 月 8 日</span></span><i data-lucide="chevron-right" class="ml-auto size-4 text-slate-300"></i></button>
+                </div>
+              </div>
+              <div class="bg-white rounded-3xl shadow-card border border-white p-5">
+                <div class="flex items-center justify-between mb-4"><div><h2 class="font-bold">精选 Prompt</h2><p class="text-xs text-slate-400 mt-1">点击即可使用</p></div><span class="size-9 rounded-xl bg-violet-50 text-violet-600 grid place-items-center"><i data-lucide="sparkles" class="size-4"></i></span></div>
+                <div class="space-y-2.5">
+                  <button class="prompt-chip w-full p-3 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/40 text-left" data-prompt="请用费曼学习法解释这个知识点："><span class="text-[11px] text-blue-600 bg-blue-50 rounded-full px-2 py-1">知识理解</span><span class="block mt-2 text-sm font-medium">用费曼学习法讲清一个概念</span></button>
+                  <button class="prompt-chip w-full p-3 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/40 text-left" data-prompt="请根据以下主题生成论文大纲，并说明每一章节的论证目标："><span class="text-[11px] text-emerald-600 bg-emerald-50 rounded-full px-2 py-1">论文写作</span><span class="block mt-2 text-sm font-medium">生成清晰、有逻辑的论文大纲</span></button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="space-y-5 xl:sticky xl:top-24">
+            <div class="bg-white rounded-3xl shadow-card border border-white p-5">
+              <div class="flex items-center justify-between"><div><h2 class="font-bold">学习概览</h2><p class="text-xs text-slate-400 mt-1">2026 年 9 月 10 日</p></div><button class="size-8 grid place-items-center rounded-lg hover:bg-slate-50 text-slate-400"><i data-lucide="more-horizontal" class="size-4"></i></button></div>
+              <div class="mt-5 flex items-center gap-5">
+                <div class="relative size-24 shrink-0"><svg viewBox="0 0 36 36" class="progress-ring size-24"><path d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0-31.831" fill="none" stroke="#eaf0f8" stroke-width="3"/><path d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0-31.831" fill="none" stroke="#4382f6" stroke-width="3" stroke-linecap="round" stroke-dasharray="72,100"/></svg><div class="absolute inset-0 grid place-items-center text-center"><span><b class="text-xl">72</b><small class="text-slate-400">%</small><em class="block not-italic text-[10px] text-slate-400">今日目标</em></span></div></div>
+                <div class="space-y-3 min-w-0 flex-1"><div><div class="flex justify-between text-xs mb-1"><span class="text-slate-500">学习时长</span><b>1h 48m</b></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-full w-[72%] rounded-full bg-blue-500"></div></div></div><div><div class="flex justify-between text-xs mb-1"><span class="text-slate-500">完成任务</span><b>5 / 7</b></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-full w-[71%] rounded-full bg-violet-500"></div></div></div></div>
+              </div>
+              <div class="grid grid-cols-3 gap-2 mt-5 pt-4 border-t border-slate-100 text-center"><div><b class="block text-lg">12</b><span class="text-[11px] text-slate-400">今日提问</span></div><div><b class="block text-lg">3</b><span class="text-[11px] text-slate-400">处理文件</span></div><div><b class="block text-lg">7</b><span class="text-[11px] text-slate-400">连续天数</span></div></div>
+            </div>
+
+            <div class="relative overflow-hidden rounded-3xl brand-gradient text-white p-5 shadow-float">
+              <div class="absolute inset-0 soft-grid opacity-25"></div><div class="absolute -right-12 -bottom-16 size-36 rounded-full bg-white/15"></div>
+              <div class="relative"><div class="flex items-center justify-between"><span class="text-xs text-blue-100">今日学习计划</span><span class="size-8 rounded-xl bg-white/15 grid place-items-center"><i data-lucide="calendar-check" class="size-4"></i></span></div><h2 class="font-bold text-lg mt-4">概率论专项复习</h2><p class="text-sm text-blue-100 mt-1">还剩 2 个知识点待完成</p><div class="flex gap-1.5 mt-4"><span class="h-1.5 flex-1 rounded-full bg-white"></span><span class="h-1.5 flex-1 rounded-full bg-white"></span><span class="h-1.5 flex-1 rounded-full bg-white/25"></span><span class="h-1.5 flex-1 rounded-full bg-white/25"></span></div><button id="continueBtn" class="mt-5 w-full h-10 rounded-xl bg-white text-blue-600 font-semibold text-sm hover:bg-blue-50 flex items-center justify-center gap-2">继续学习<i data-lucide="arrow-right" class="size-4"></i></button></div>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-card border border-white p-5"><div class="flex items-center justify-between"><h2 class="font-bold">本周学习节奏</h2><span class="text-xs text-emerald-600">+18%</span></div><div class="flex items-end gap-2 h-24 mt-5" aria-label="本周学习时长柱状图"><div class="flex-1 h-[42%] rounded-t-lg bg-blue-100"></div><div class="flex-1 h-[60%] rounded-t-lg bg-blue-200"></div><div class="flex-1 h-[50%] rounded-t-lg bg-blue-100"></div><div class="flex-1 h-[82%] rounded-t-lg bg-blue-400"></div><div class="flex-1 h-[65%] rounded-t-lg bg-blue-200"></div><div class="flex-1 h-[94%] rounded-t-lg bg-blue-600"></div><div class="flex-1 h-[28%] rounded-t-lg bg-blue-100"></div></div><div class="grid grid-cols-7 text-center text-[10px] text-slate-400 mt-2"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div></div>
+          </aside>
+        </section>
+      </div>
+    </main>
+
+    <div id="toast" role="status" aria-live="polite" class="fixed z-50 left-1/2 bottom-6 -translate-x-1/2 translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white rounded-xl shadow-xl px-4 py-3 flex items-center gap-2 text-sm pointer-events-none"><i data-lucide="check-circle-2" class="size-4 text-emerald-400"></i><span id="toastText">操作成功</span></div>
+
+    <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+      <div class="modal-in bg-white w-full max-w-md rounded-3xl shadow-2xl p-6"><div class="flex items-center justify-between"><h2 id="modalTitle" class="text-lg font-bold">通知</h2><button id="closeModal" class="size-9 rounded-xl hover:bg-slate-100 grid place-items-center"><i data-lucide="x" class="size-5"></i></button></div><div id="modalContent" class="mt-4"></div></div>
+    </div>
+
+    <script>
+      const $ = (s, p=document) => p.querySelector(s);
+      const $$ = (s, p=document) => [...p.querySelectorAll(s)];
+      const toast = (message) => { $('#toastText').textContent = message; const el=$('#toast'); el.classList.remove('translate-y-20','opacity-0'); setTimeout(()=>el.classList.add('translate-y-20','opacity-0'),2200); };
+      const iconForMode = { 'AI 作业助手':'brain-circuit','PDF 智能总结':'file-text','课堂转录':'audio-lines','数学分步解题':'radical','论文写作助手':'notebook-pen','Prompt 模板中心':'wand-sparkles','智能问答':'sparkles' };
+      function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
+      function selectTool(name, placeholder){
+        $('#composerMode').textContent=name;
+        $('#composerHint').textContent=name==='PDF 智能总结'?'支持 PDF / DOCX，单文件最大 50MB':name==='课堂转录'?'支持 MP3 / WAV / M4A':'AI 会自动识别任务并结构化回答';
+        $('#questionInput').placeholder=placeholder||`输入你想让${name}帮忙解决的问题……`;
+        $('#modeIcon').innerHTML=`<i data-lucide="${iconForMode[name]||'sparkles'}" class="size-4"></i>`;
+        $$('.tool-card').forEach(c=>c.classList.toggle('ring-2',c.dataset.tool===name));
+        window.scrollTo({top:0,behavior:'smooth'}); refreshIcons(); toast(`已切换至${name}`);
+      }
+      function openModal(title, html){ $('#modalTitle').textContent=title; $('#modalContent').innerHTML=html; $('#modal').classList.remove('hidden'); $('#modal').classList.add('flex'); refreshIcons(); }
+      function closeModal(){ $('#modal').classList.add('hidden'); $('#modal').classList.remove('flex'); }
+      function openSidebar(){ $('#sidebar').classList.remove('-translate-x-full'); $('#sidebarBackdrop').classList.remove('hidden'); }
+      function closeSidebar(){ if(innerWidth<1024){ $('#sidebar').classList.add('-translate-x-full'); $('#sidebarBackdrop').classList.add('hidden'); } }
+
+      $$('.tool-card').forEach(card=>card.addEventListener('click',()=>selectTool(card.dataset.tool,card.dataset.placeholder)));
+      $$('[data-tool]:not(.tool-card)').forEach(btn=>btn.addEventListener('click',()=>{ selectTool(btn.dataset.tool); closeSidebar(); }));
+      $$('.prompt-chip').forEach(btn=>btn.addEventListener('click',()=>{ $('#questionInput').value=btn.dataset.prompt; $('#questionInput').focus(); window.scrollTo({top:0,behavior:'smooth'}); toast('Prompt 已填入输入框'); }));
+      $('#menuBtn').addEventListener('click',openSidebar); $('#sidebarBackdrop').addEventListener('click',closeSidebar);
+      $('#closeModal').addEventListener('click',closeModal); $('#modal').addEventListener('click',e=>{ if(e.target.id==='modal')closeModal(); });
+      $('#uploadBtn').addEventListener('click',()=>$('#fileInput').click()); $('#imageBtn').addEventListener('click',()=>$('#fileInput').click());
+      $('#fileInput').addEventListener('change',e=>{ const box=$('#attachmentList'); box.innerHTML=''; [...e.target.files].forEach(f=>{ const item=document.createElement('span'); item.className='inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs'; item.innerHTML=`<i data-lucide="paperclip" class="size-3.5"></i><span class="max-w-[180px] truncate">${f.name.replace(/[<>]/g,'')}</span>`; box.appendChild(item); }); box.classList.toggle('hidden',!e.target.files.length); refreshIcons(); if(e.target.files.length) toast(`已添加 ${e.target.files.length} 个文件`); });
+      $('#voiceBtn').addEventListener('click',function(){ this.classList.toggle('bg-red-50'); this.classList.toggle('text-red-500'); toast(this.classList.contains('text-red-500')?'正在聆听，请开始说话':'语音输入已结束'); });
+      function sendQuestion(){
+        const q=$('#questionInput').value.trim(); if(!q){ toast('请先输入一个学习问题'); $('#questionInput').focus(); return; }
+        const panel=$('#answerPanel'); panel.classList.remove('hidden'); $('#typingLoader').classList.remove('hidden'); $('#answerContent').classList.add('hidden'); $('#answerActions').classList.add('hidden'); $('#answerStatus').textContent='正在思考'; panel.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>{ $('#typingLoader').classList.add('hidden'); $('#answerContent').classList.remove('hidden'); $('#answerActions').classList.remove('hidden'); $('#answerStatus').textContent='已完成 · 1.6s'; $('#answerContent').innerHTML=`<p class="font-semibold text-slate-800 mb-2">我已经理解你的问题：</p><p>${q.replace(/[<>]/g,'')}</p><div class="mt-4 p-4 rounded-2xl bg-blue-50/70 border border-blue-100"><p class="font-semibold text-blue-800">解题思路</p><ol class="list-decimal pl-5 mt-2 space-y-1 text-slate-600"><li>先识别题目中的已知条件与目标。</li><li>匹配核心知识点，建立清晰的推导路径。</li><li>逐步验证结果，并补充容易出错的地方。</li></ol></div><p class="mt-4 text-slate-500">这是交互预览中的示例回答。完整产品接入模型后，会根据你的内容生成真实解析。</p>`; refreshIcons(); },1300);
+      }
+      $('#sendBtn').addEventListener('click',sendQuestion); $('#questionInput').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendQuestion(); } });
+      $('#notifyBtn').addEventListener('click',()=>openModal('通知中心','<div class="space-y-3"><div class="flex gap-3 p-3 rounded-2xl bg-blue-50"><span class="size-9 rounded-xl bg-blue-100 text-blue-600 grid place-items-center shrink-0"><i data-lucide="file-check-2" class="size-4"></i></span><div><p class="text-sm font-medium">PDF 总结已完成</p><p class="text-xs text-slate-500 mt-1">《机器学习课程 Lecture 06》已提取 12 个重点</p></div></div><div class="flex gap-3 p-3"><span class="size-9 rounded-xl bg-orange-50 text-orange-500 grid place-items-center shrink-0"><i data-lucide="flame" class="size-4"></i></span><div><p class="text-sm font-medium">连续学习 7 天</p><p class="text-xs text-slate-500 mt-1">保持得很好，今天再完成 20 分钟吧</p></div></div></div>'));
+      $('#streakBtn').addEventListener('click',()=>openModal('连续学习 7 天','<div class="text-center py-3"><div class="mx-auto size-20 rounded-full bg-orange-50 grid place-items-center text-orange-500"><i data-lucide="flame" class="size-10 fill-orange-400"></i></div><p class="text-3xl font-bold mt-4">7 天</p><p class="text-sm text-slate-500 mt-2">你已连续学习 12 小时 36 分钟</p><div class="grid grid-cols-7 gap-2 mt-5"><span class="size-8 rounded-full bg-orange-500 text-white grid place-items-center text-xs">一</span><span class="size-8 rounded-full bg-orange-500 text-white grid place-items-center text-xs">二</span><span class="size-8 rounded-full bg-orange-500 text-white grid place-items-center text-xs">三</span><span class="size-8 rounded-full bg-orange-500 text-white grid place-items-center text-xs">四</span><span class="size-8 rounded-full bg-orange-500 text-white grid place-items-center text-xs">五</span><span class="size-8 rounded-full bg-orange-500 text-white grid place-items-center text-xs">六</span><span class="size-8 rounded-full bg-orange-500 text-white grid place-items-center text-xs">日</span></div></div>'));
+      $('#continueBtn').addEventListener('click',()=>{ $('#questionInput').value='请继续讲解概率论中的贝叶斯公式，并给我一道练习题。'; selectTool('数学分步解题','输入数学或统计题目……'); $('#questionInput').focus(); });
+      $('#allToolsBtn').addEventListener('click',()=>$('#toolCards').scrollIntoView({behavior:'smooth',block:'center'}));
+      $$('.history-item').forEach(item=>item.addEventListener('click',()=>toast('已打开学习记录')));
+      $$('.answer-action').forEach(btn=>btn.addEventListener('click',()=>toast(btn.textContent.trim()==='复制'?'回答已复制':btn.textContent.trim()==='有帮助'?'感谢你的反馈':'正在重新生成回答')));
+      $$('[data-page]').forEach(btn=>btn.addEventListener('click',()=>{ $$('.nav-item').forEach(n=>n.classList.remove('active')); if(btn.classList.contains('nav-item'))btn.classList.add('active'); toast(`${btn.textContent.trim()}页面功能已在当前原型中展示`); closeSidebar(); }));
+      $('#globalSearch').addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.value.trim()) toast(`正在搜索“${e.target.value.trim()}”`); });
+      $('#modeDropdown').addEventListener('click',()=>openModal('选择学习模式',`<div class="grid grid-cols-2 gap-2">${Object.keys(iconForMode).map(n=>`<button class="modal-tool text-left p-3 rounded-xl border border-slate-100 hover:border-blue-300 hover:bg-blue-50 text-sm" data-name="${n}">${n}</button>`).join('')}</div>`));
+      document.addEventListener('click',e=>{ const b=e.target.closest('.modal-tool'); if(b){ closeModal(); selectTool(b.dataset.name); } });
+      const hour=new Date().getHours(); $('#dateGreeting').textContent=`${hour<12?'上午好':hour<18?'下午好':'晚上好'}，林同学`;
+      refreshIcons();
+    </script>
+  </body>
+</html>
